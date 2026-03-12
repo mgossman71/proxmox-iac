@@ -1,8 +1,8 @@
 proxmox_endpoint     = "https://10.0.0.132:8006/api2/json"
-proxmox_token_id     = "terraform@pve!iac"
-proxmox_token_secret = "PUT_TOKEN_SECRET_HERE"
+proxmox_token_id     = "terraform@pve@pam!iac"
+proxmox_token_secret = "PASTE_THE_REAL_TOKEN_SECRET_HERE"
 
-node_name        = "IaC-Test"
+node_name        = "pve-t0"
 vmid             = 200
 hostname         = "iac-test-lxc"
 ipv4_address     = "10.0.0.98/24"
