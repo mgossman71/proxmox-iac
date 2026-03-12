@@ -3,7 +3,7 @@ proxmox_token_id     = "terraform@pam!iac"
 proxmox_token_secret = "PASTE_THE_REAL_TOKEN_SECRET_HERE"
 
 node_name        = "pve-t0"
-vmid             = 200
+vmid             = 201
 hostname         = "iac-97-lxc"
 ipv4_address     = "10.0.0.97/24"
 ipv4_gateway     = "10.0.0.3"
