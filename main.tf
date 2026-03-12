@@ -8,11 +8,9 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = var.proxmox_endpoint
-
+  endpoint  = var.proxmox_endpoint
   api_token = "${var.proxmox_token_id}=${var.proxmox_token_secret}"
-
-  insecure = true
+  insecure  = true
 }
 
 resource "proxmox_virtual_environment_container" "test_lxc" {
@@ -52,6 +50,10 @@ resource "proxmox_virtual_environment_container" "test_lxc" {
   memory {
     dedicated = 1024
     swap      = 512
+  }
+
+  features {
+    nesting = true
   }
 
   unprivileged = true
