@@ -1,5 +1,5 @@
 proxmox_endpoint     = "https://10.0.0.132:8006/api2/json"
-proxmox_token_id     = "terraform@pve@pam!iac"
+proxmox_token_id     = "terraform@pam!iac"
 proxmox_token_secret = "PASTE_THE_REAL_TOKEN_SECRET_HERE"
 
 node_name        = "pve-t0"
