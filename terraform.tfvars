@@ -4,8 +4,8 @@ proxmox_token_secret = "PASTE_THE_REAL_TOKEN_SECRET_HERE"
 
 node_name        = "pve-t0"
 vmid             = 200
-hostname         = "iac-test-lxc"
-ipv4_address     = "10.0.0.98/24"
+hostname         = "iac-97-lxc"
+ipv4_address     = "10.0.0.97/24"
 ipv4_gateway     = "10.0.0.3"
 bridge           = "vmbr0"
 datastore_id     = "local-lvm"
