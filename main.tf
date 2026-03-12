@@ -37,7 +37,7 @@ resource "proxmox_virtual_environment_container" "test_lxc" {
 
   operating_system {
     template_file_id = var.template_file_id
-    type             = "debian"
+    type             = "ubuntu"
   }
 
   disk {
