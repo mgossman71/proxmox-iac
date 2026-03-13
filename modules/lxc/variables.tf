@@ -27,8 +27,21 @@ variable "ipv4_gateway" {
 }
 
 variable "template_file_id" {
-  description = "LXC template file ID (e.g. local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst)"
+  description = "LXC template file ID (e.g. local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst). Mutually exclusive with clone_vm_id."
   type        = string
+  default     = null
+}
+
+variable "clone_vm_id" {
+  description = "VMID of an existing LXC template to clone. Mutually exclusive with template_file_id."
+  type        = number
+  default     = null
+}
+
+variable "clone_node_name" {
+  description = "Node where the clone source template lives. Required when cloning cross-node (i.e. template is on a different node than the deployment target)."
+  type        = string
+  default     = null
 }
 
 # ── Networking ─────────────────────────────────────────────────────────────────

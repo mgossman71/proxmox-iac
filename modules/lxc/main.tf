@@ -27,9 +27,20 @@ resource "proxmox_virtual_environment_container" "this" {
     bridge = var.bridge
   }
 
-  operating_system {
-    template_file_id = var.template_file_id
-    type             = var.os_type
+  dynamic "operating_system" {
+    for_each = var.clone_vm_id == null ? [1] : []
+    content {
+      template_file_id = var.template_file_id
+      type             = var.os_type
+    }
+  }
+
+  dynamic "clone" {
+    for_each = var.clone_vm_id != null ? [1] : []
+    content {
+      vm_id     = var.clone_vm_id
+      node_name = var.clone_node_name
+    }
   }
 
   disk {

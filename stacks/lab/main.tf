@@ -17,6 +17,13 @@ locals {
     unprivileged     = true
     started          = true
     tags             = ["iac", "lab"]
+    # Provisioning mode — set exactly one per container.
+    # template_file_id: provision from a raw LXC template tarball.
+    # clone_vm_id:      clone an existing LXC template (faster, pre-configured).
+    # clone_node_name:  source node for clone_vm_id (required for cross-node clones).
+    template_file_id = null
+    clone_vm_id      = null
+    clone_node_name  = null
   }
 
   vm_defaults = {
@@ -38,11 +45,43 @@ locals {
   # To add a new container: copy any block, change the key and required fields.
   # To remove a container: delete its block and run terraform apply.
   # To change a node: update node_name (Proxmox handles the rest).
+  #
+  # Provisioning modes (set exactly one per container):
+  #   template_file_id  — provision from a raw LXC template tarball (default method)
+  #   clone_vm_id       — clone an existing LXC template (faster; inherits pre-installed software)
+  #
+  # Clone example (template VMID 100 lives on pve-t0):
+  #
+   "my-clone-1" = merge(local.container_defaults, {
+     vmid             = 210
+     node_name        = "pve-t0"       # node to deploy the clone ON
+     hostname         = "my-clone-1"
+     ipv4_address     = "dhcp"
+     ipv4_gateway     = null
+     clone_vm_id      = 100            # VMID of your LXC template
+     clone_node_name  = null           # null = same node; set "pve-t0" for cross-node deploys
+     cpu_cores        = 2
+     memory_dedicated = 1024
+     tags             = ["iac", "lab", "clone"]
+   })
+  #
+  # Cross-node clone example (template on pve-t0, deploy to pve-t1):
+  #
+  # "my-clone-2" = merge(local.container_defaults, {
+  #   vmid             = 211
+  #   node_name        = "pve-t1"       # deploy here
+  #   hostname         = "my-clone-2"
+  #   ipv4_address     = "dhcp"
+  #   ipv4_gateway     = null
+  #   clone_vm_id      = 100
+  #   clone_node_name  = "pve-t0"       # source node where VMID 100 lives
+  #   tags             = ["iac", "lab", "clone"]
+  # })
 
   containers = {
     "lxc-test-1" = merge(local.container_defaults, {
       vmid             = 200
-      node_name        = "pve-t0"
+      node_name        = "pve-t1"
       hostname         = "lxc-test-1"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
@@ -107,6 +146,8 @@ module "containers" {
   ipv4_address     = each.value.ipv4_address
   ipv4_gateway     = each.value.ipv4_gateway
   template_file_id = each.value.template_file_id
+  clone_vm_id      = each.value.clone_vm_id
+  clone_node_name  = each.value.clone_node_name
   bridge           = each.value.bridge
   datastore_id     = each.value.datastore_id
   os_type          = each.value.os_type
