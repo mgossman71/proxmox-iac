@@ -68,7 +68,7 @@ pveum user token add terraform@pam iac --privsep=0
 
 ## Step 2 — Find available images and templates
 
-### LXC templates
+### LXC templates (image method)
 
 List templates already downloaded to a node:
 
@@ -94,6 +94,19 @@ The `template_file_id` value for Terraform follows this format:
 # e.g.
 local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst
 ```
+
+### LXC templates (clone method)
+
+If you have built a container and converted it to a template in Proxmox, you can clone it instead of provisioning from a raw tarball. Cloned containers inherit all installed software and configuration from the template.
+
+Find the VMID of your LXC template:
+
+```bash
+# On a Proxmox node — templates show status "stopped" with a lock icon in the UI
+pct list
+```
+
+Note the VMID of your template (e.g. `100`). That is the value used for `clone_vm_id` in Terraform. If the template lives on shared storage (NFS, Ceph, etc.), it can be cloned to any node in the cluster.
 
 ### QEMU cloud images
 
@@ -173,8 +186,11 @@ edit the `containers` or `vms` map.
 
 ### Adding an LXC container
 
-Add a new entry to the `containers` map. The `merge()` call applies the
-stack-wide defaults — only specify fields that differ from them:
+There are two provisioning methods. Choose one per container.
+
+#### Method 1 — Image (tarball template)
+
+Provisions a fresh container from an LXC tarball already downloaded to the node. Use this when you want a clean OS with no pre-installed software.
 
 ```hcl
 containers = {
@@ -182,22 +198,42 @@ containers = {
     vmid             = 200
     node_name        = "pve-t0"
     hostname         = "lxc-test-1"
-    ipv4_address     = "dhcp"
-    ipv4_gateway     = null
+    ipv4_address     = "dhcp"           # or static: "10.0.0.50/24"
+    ipv4_gateway     = null             # null for DHCP; set for static
     template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-    tags             = ["iac", "lab"]
+    tags             = ["iac", "lab", "lxc"]
+  })
+}
+```
+
+#### Method 2 — Clone (from an existing LXC template)
+
+Clones a container you have already built and marked as a template in Proxmox. Use this when you want a container that already has software and configuration baked in. Cross-node cloning requires the template to be on shared storage (NFS, Ceph, etc.).
+
+```hcl
+containers = {
+  # Same-node clone — template and new container on the same node
+  "my-clone-1" = merge(local.container_defaults, {
+    vmid            = 310
+    node_name       = "pve-t0"
+    hostname        = "my-clone-1"
+    ipv4_address    = "dhcp"
+    ipv4_gateway    = null
+    clone_vm_id     = 100              # VMID of the LXC template
+    clone_node_name = null             # null when template is on the same node
+    tags            = ["iac", "lab", "clone"]
   })
 
-  # Add a second container — only override what differs from the defaults
-  "lxc-test-2" = merge(local.container_defaults, {
-    vmid             = 201
-    node_name        = "pve-t1"        # different node
-    hostname         = "lxc-test-2"
-    ipv4_address     = "10.0.0.98/24"  # static IP
-    template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-    cpu_cores        = 4               # override default of 2
-    memory_dedicated = 2048            # override default of 1024
-    tags             = ["iac", "lab", "db"]
+  # Cross-node clone — template on pve-t0, deploy to pve-t1
+  "my-clone-2" = merge(local.container_defaults, {
+    vmid            = 311
+    node_name       = "pve-t1"         # node to deploy the clone ON
+    hostname        = "my-clone-2"
+    ipv4_address    = "dhcp"
+    ipv4_gateway    = null
+    clone_vm_id     = 100              # VMID of the LXC template
+    clone_node_name = "pve-t0"         # node where the template lives
+    tags            = ["iac", "lab", "clone"]
   })
 }
 ```
@@ -285,18 +321,22 @@ Each stack has its own `.terraform/` directory and state file — `production` a
 
 ### `modules/lxc` — LXC container
 
+Set exactly one of `template_file_id` or `clone_vm_id` per container.
+
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `vmid` | yes | — | Unique container ID |
-| `node_name` | yes | — | Proxmox node name |
+| `node_name` | yes | — | Proxmox node to deploy on |
 | `hostname` | yes | — | Container hostname |
 | `ipv4_address` | yes | — | CIDR address or `"dhcp"` |
 | `ipv4_gateway` | no | `null` | Gateway — omit when using DHCP |
-| `template_file_id` | yes | — | LXC template file ID |
+| `template_file_id` | no* | `null` | LXC tarball template file ID — use for image provisioning |
+| `clone_vm_id` | no* | `null` | VMID of an existing LXC template to clone |
+| `clone_node_name` | no | `null` | Source node for `clone_vm_id` — required for cross-node cloning |
 | `bridge` | no | `vmbr0` | Network bridge |
 | `datastore_id` | no | `local-lvm` | Storage for root disk |
 | `disk_size` | no | `8` | Root disk size in GB |
-| `os_type` | no | `ubuntu` | OS type hint |
+| `os_type` | no | `ubuntu` | OS type hint (image method only) |
 | `cpu_cores` | no | `2` | vCPU cores |
 | `memory_dedicated` | no | `1024` | RAM in MB |
 | `memory_swap` | no | `512` | Swap in MB |
@@ -304,6 +344,8 @@ Each stack has its own `.terraform/` directory and state file — `production` a
 | `nesting` | no | `true` | Allow nested virtualisation |
 | `started` | no | `true` | Start after creation |
 | `tags` | no | `["iac"]` | Proxmox tags |
+
+*Exactly one of `template_file_id` or `clone_vm_id` must be provided.
 
 ### `modules/vm` — QEMU VM
 
