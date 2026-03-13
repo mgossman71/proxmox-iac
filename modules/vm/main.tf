@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "~> 0.81"
+    }
+  }
+}
+
 resource "proxmox_virtual_environment_vm" "this" {
   node_name = var.node_name
   vm_id     = var.vmid
