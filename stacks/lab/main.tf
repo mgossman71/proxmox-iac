@@ -104,7 +104,7 @@ locals {
     "lxc-clone-1" = merge(local.container_defaults, {
       vmid            = 310
       node_name       = "pve-t0"
-      hostname        = "my-clone-1"
+      hostname        = "lxc-clone-1"
       datastore_id    = "fiserv0"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
@@ -118,7 +118,7 @@ locals {
     "lxc-clone-2" = merge(local.container_defaults, {
       vmid            = 311
       node_name       = "pve-t1"
-      hostname        = "my-clone-2"
+      hostname        = "lxc-clone-2"
       datastore_id    = "fiserv0"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
