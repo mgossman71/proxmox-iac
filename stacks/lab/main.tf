@@ -150,6 +150,7 @@ locals {
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
       tags             = ["iac", "lab", "lxc"]
     })
+  }
 
   # ── QEMU VMs ─────────────────────────────────────────────────────────────────
   # To add a VM: copy an example below into vms = { }, adjust the fields, and
