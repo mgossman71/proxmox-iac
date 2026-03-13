@@ -59,6 +59,16 @@ locals {
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
       tags             = ["iac", "lab", "lxc"]
     })
+
+    "lxc-test-3" = merge(local.container_defaults, {
+      vmid             = 202
+      node_name        = "pve-t0"
+      hostname         = "lxc-test-2"
+      ipv4_address     = "dhcp"
+      ipv4_gateway     = null
+      template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+      tags             = ["iac", "lab", "lxc"]
+    })
   }
 
   # ── QEMU VMs ─────────────────────────────────────────────────────────────────
