@@ -8,7 +8,7 @@ resource "proxmox_virtual_environment_container" "this" {
     ip_config {
       ipv4 {
         address = var.ipv4_address
-        gateway = var.ipv4_gateway
+        gateway = var.ipv4_address != "dhcp" ? var.ipv4_gateway : null
       }
     }
   }

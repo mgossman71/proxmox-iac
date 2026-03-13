@@ -40,30 +40,25 @@ locals {
   # To change a node: update node_name (Proxmox handles the rest).
 
   containers = {
-    "iac-97-lxc" = merge(local.container_defaults, {
-      vmid             = 201
+    "lxc-test-1" = merge(local.container_defaults, {
+      vmid             = 200
       node_name        = "pve-t0"
-      hostname         = "iac-97-lxc"
-      ipv4_address     = "10.0.0.97/24"
+      hostname         = "lxc-test-1"
+      ipv4_address     = "dhcp"
+      ipv4_gateway     = null
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
       tags             = ["iac", "lab", "lxc"]
     })
 
-    # Example: a second container with different specs on a different node.
-    # Uncomment and adjust to deploy it.
-    #
-    # "db-01" = merge(local.container_defaults, {
-    #   vmid             = 202
-    #   node_name        = "pve-t1"
-    #   hostname         = "db-01"
-    #   ipv4_address     = "10.0.0.98/24"
-    #   template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-    #   cpu_cores        = 4
-    #   memory_dedicated = 2048
-    #   memory_swap      = 1024
-    #   disk_size        = 20
-    #   tags             = ["iac", "lab", "db"]
-    # })
+    "lxc-test-2" = merge(local.container_defaults, {
+      vmid             = 201
+      node_name        = "pve-t0"
+      hostname         = "lxc-test-2"
+      ipv4_address     = "dhcp"
+      ipv4_gateway     = null
+      template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+      tags             = ["iac", "lab", "lxc"]
+    })
   }
 
   # ── QEMU VMs ─────────────────────────────────────────────────────────────────

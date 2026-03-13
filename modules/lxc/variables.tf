@@ -16,13 +16,14 @@ variable "hostname" {
 }
 
 variable "ipv4_address" {
-  description = "Static IPv4 address with CIDR notation (e.g. 10.0.0.97/24)"
+  description = "Static IPv4 address with CIDR notation (e.g. 10.0.0.97/24), or \"dhcp\""
   type        = string
 }
 
 variable "ipv4_gateway" {
-  description = "IPv4 default gateway"
+  description = "IPv4 default gateway. Not required when using DHCP."
   type        = string
+  default     = null
 }
 
 variable "template_file_id" {
