@@ -52,7 +52,7 @@ locals {
 
     "lxc-test-2" = merge(local.container_defaults, {
       vmid             = 201
-      node_name        = "pve-t0"
+      node_name        = "pve-t1"
       hostname         = "lxc-test-2"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
