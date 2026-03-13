@@ -236,20 +236,20 @@ locals {
       tags               = ["iac", "lab", "vm", "clone"]
     })
 
-    # Cross-node clone — template (501) on pve-t0, deploy to pve-t1
-    # datastore_id must be shared storage so pve-t1 can receive the cloned disk
-    "vm-test-2" = merge(local.vm_defaults, {
-      vmid               = 601
-      node_name          = "pve-t1"
-      name               = "vm-test-2"
-      ipv4_address       = "dhcp"
-      ipv4_gateway       = null
-      clone_vm_id        = 501
-      clone_node_name    = "pve-t0"
-      datastore_id       = "fiserv0"
-      cloud_init_enabled = true
-      tags               = ["iac", "lab", "vm", "clone"]
-    })
+#   # Cross-node clone — template (501) on pve-t0, deploy to pve-t1
+#   # datastore_id must be shared storage so pve-t1 can receive the cloned disk
+#   "vm-test-2" = merge(local.vm_defaults, {
+#     vmid               = 601
+#     node_name          = "pve-t1"
+#     name               = "vm-test-2"
+#     ipv4_address       = "dhcp"
+#     ipv4_gateway       = null
+#     clone_vm_id        = 501
+#     clone_node_name    = "pve-t0"
+#     datastore_id       = "fiserv0"
+#     cloud_init_enabled = true
+#     tags               = ["iac", "lab", "vm", "clone"]
+#   })
   }
 }
 
