@@ -229,7 +229,7 @@ locals {
      name               = "vm-test-1"
      ipv4_address       = "dhcp"
      ipv4_gateway       = null
-     clone_vm_id        = 501
+     clone_vm_id        = 502
      clone_node_name    = null
      datastore_id       = "local-lvm"
      cloud_init_enabled = true
@@ -244,7 +244,7 @@ locals {
 #     name               = "vm-test-2"
 #     ipv4_address       = "dhcp"
 #     ipv4_gateway       = null
-#     clone_vm_id        = 501
+#     clone_vm_id        = 502
 #     clone_node_name    = "pve-t0"
 #     datastore_id       = "fiserv0"
 #     cloud_init_enabled = true
