@@ -1,0 +1,108 @@
+# ── Required ───────────────────────────────────────────────────────────────────
+
+variable "vmid" {
+  description = "Unique container ID (must not conflict with other VMs/CTs on the cluster)"
+  type        = number
+}
+
+variable "node_name" {
+  description = "Proxmox node to deploy this container on"
+  type        = string
+}
+
+variable "hostname" {
+  description = "Container hostname"
+  type        = string
+}
+
+variable "ipv4_address" {
+  description = "Static IPv4 address with CIDR notation (e.g. 10.0.0.97/24), or \"dhcp\""
+  type        = string
+}
+
+variable "ipv4_gateway" {
+  description = "IPv4 default gateway. Not required when using DHCP."
+  type        = string
+  default     = null
+}
+
+variable "template_file_id" {
+  description = "LXC template file ID (e.g. local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst)"
+  type        = string
+}
+
+# ── Networking ─────────────────────────────────────────────────────────────────
+
+variable "bridge" {
+  description = "Network bridge to attach the container interface to"
+  type        = string
+  default     = "vmbr0"
+}
+
+# ── Storage ────────────────────────────────────────────────────────────────────
+
+variable "datastore_id" {
+  description = "Proxmox datastore for the root disk"
+  type        = string
+  default     = "local-lvm"
+}
+
+variable "disk_size" {
+  description = "Root disk size in GB"
+  type        = number
+  default     = 8
+}
+
+# ── OS ─────────────────────────────────────────────────────────────────────────
+
+variable "os_type" {
+  description = "OS type hint for Proxmox (ubuntu, debian, centos, etc.)"
+  type        = string
+  default     = "ubuntu"
+}
+
+# ── Compute ────────────────────────────────────────────────────────────────────
+
+variable "cpu_cores" {
+  description = "Number of CPU cores"
+  type        = number
+  default     = 2
+}
+
+variable "memory_dedicated" {
+  description = "Dedicated memory in MB"
+  type        = number
+  default     = 1024
+}
+
+variable "memory_swap" {
+  description = "Swap size in MB"
+  type        = number
+  default     = 512
+}
+
+# ── Container behaviour ────────────────────────────────────────────────────────
+
+variable "unprivileged" {
+  description = "Run as an unprivileged container"
+  type        = bool
+  default     = true
+}
+
+variable "nesting" {
+  description = "Allow nested virtualisation inside the container"
+  type        = bool
+  default     = true
+}
+
+variable "started" {
+  description = "Start the container after creation"
+  type        = bool
+  default     = true
+}
+
+variable "tags" {
+  description = "Proxmox tags to apply to the container"
+  type        = list(string)
+  default     = ["iac"]
+}

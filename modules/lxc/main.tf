@@ -7,13 +7,7 @@ terraform {
   }
 }
 
-provider "proxmox" {
-  endpoint  = var.proxmox_endpoint
-  api_token = "${var.proxmox_token_id}=${var.proxmox_token_secret}"
-  insecure  = true
-}
-
-resource "proxmox_virtual_environment_container" "test_lxc" {
+resource "proxmox_virtual_environment_container" "this" {
   node_name = var.node_name
   vm_id     = var.vmid
 
@@ -23,7 +17,7 @@ resource "proxmox_virtual_environment_container" "test_lxc" {
     ip_config {
       ipv4 {
         address = var.ipv4_address
-        gateway = var.ipv4_gateway
+        gateway = var.ipv4_address != "dhcp" ? var.ipv4_gateway : null
       }
     }
   }
@@ -35,29 +29,28 @@ resource "proxmox_virtual_environment_container" "test_lxc" {
 
   operating_system {
     template_file_id = var.template_file_id
-    type             = "ubuntu"
+    type             = var.os_type
   }
 
   disk {
     datastore_id = var.datastore_id
-    size         = 8
+    size         = var.disk_size
   }
 
   cpu {
-    cores = 2
+    cores = var.cpu_cores
   }
 
   memory {
-    dedicated = 1024
-    swap      = 512
+    dedicated = var.memory_dedicated
+    swap      = var.memory_swap
   }
 
   features {
-    nesting = true
+    nesting = var.nesting
   }
 
-  unprivileged = true
-  started      = true
-
-  tags = ["iac", "lab", "lxc"]
+  unprivileged = var.unprivileged
+  started      = var.started
+  tags         = var.tags
 }
