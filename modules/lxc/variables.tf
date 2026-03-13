@@ -44,7 +44,6 @@ variable "clone_node_name" {
   default     = null
 }
 
-
 # ── Networking ─────────────────────────────────────────────────────────────────
 
 variable "bridge" {

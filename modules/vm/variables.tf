@@ -16,18 +16,32 @@ variable "name" {
 }
 
 variable "ipv4_address" {
-  description = "Static IPv4 address with CIDR notation (e.g. 10.0.0.50/24)"
+  description = "IPv4 address with CIDR notation (e.g. 10.0.0.50/24), or \"dhcp\""
   type        = string
 }
 
 variable "ipv4_gateway" {
-  description = "IPv4 default gateway"
+  description = "IPv4 default gateway. Not required when using DHCP."
   type        = string
+  default     = null
 }
 
 variable "disk_file_id" {
-  description = "Cloud image file ID already present on the datastore (e.g. local:iso/ubuntu-24.04-server-cloudimg-amd64.img)"
+  description = "Cloud image file ID already present on the datastore (e.g. local:iso/ubuntu-24.04-server-cloudimg-amd64.img). Mutually exclusive with clone_vm_id."
   type        = string
+  default     = null
+}
+
+variable "clone_vm_id" {
+  description = "VMID of an existing QEMU template to clone. Mutually exclusive with disk_file_id."
+  type        = number
+  default     = null
+}
+
+variable "clone_node_name" {
+  description = "Node where the clone source template lives. Required when cloning cross-node (i.e. template is on a different node than the deployment target)."
+  type        = string
+  default     = null
 }
 
 # ── Networking ─────────────────────────────────────────────────────────────────
@@ -87,6 +101,12 @@ variable "ssh_public_keys" {
 }
 
 # ── VM behaviour ───────────────────────────────────────────────────────────────
+
+variable "cloud_init_enabled" {
+  description = "Enable cloud-init configuration (hostname, IP, SSH keys) on first boot. Set to false when cloning a template that does not have cloud-init installed."
+  type        = bool
+  default     = true
+}
 
 variable "agent_enabled" {
   description = "Enable the QEMU guest agent (requires agent installed in the guest)"

@@ -5,7 +5,7 @@ locals {
   # explicitly set that field.
 
   container_defaults = {
-    ipv4_gateway     = "10.0.0.3"
+    ipv4_gateway     = null
     bridge           = "vmbr0"
     datastore_id     = "local-lvm"
     os_type          = "ubuntu"
@@ -27,7 +27,7 @@ locals {
   }
 
   vm_defaults = {
-    ipv4_gateway     = "10.0.0.3"
+    ipv4_gateway     = null
     bridge           = "vmbr0"
     datastore_id     = "local-lvm"
     cpu_cores        = 2
@@ -39,6 +39,14 @@ locals {
     agent_enabled    = true
     started          = true
     tags             = ["iac", "lab"]
+    # Provisioning mode — set exactly one per VM.
+    # disk_file_id: provision from a cloud image already downloaded to the node.
+    # clone_vm_id:  clone an existing QEMU template (faster, pre-configured).
+    # clone_node_name: source node for clone_vm_id (required for cross-node clones).
+    disk_file_id       = null
+    clone_vm_id        = null
+    clone_node_name    = null
+    cloud_init_enabled = true
   }
 
   # ── LXC Containers ───────────────────────────────────────────────────────────
@@ -96,8 +104,8 @@ locals {
     "my-clone-1" = merge(local.container_defaults, {
       vmid            = 310
       node_name       = "pve-t0"
-      datastore_id    = "fiserv0"
       hostname        = "my-clone-1"
+      datastore_id    = "fiserv0"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 100
@@ -110,8 +118,8 @@ locals {
     "my-clone-2" = merge(local.container_defaults, {
       vmid            = 311
       node_name       = "pve-t1"
-      datastore_id    = "fiserv0"
       hostname        = "my-clone-2"
+      datastore_id    = "fiserv0"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 100
@@ -124,8 +132,8 @@ locals {
     "lxc-test-1" = merge(local.container_defaults, {
       vmid             = 200
       node_name        = "pve-t1"
-      datastore_id    = "fiserv0"
       hostname         = "lxc-test-1"
+      datastore_id     = "fiserv0"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
@@ -135,8 +143,8 @@ locals {
     "lxc-test-2" = merge(local.container_defaults, {
       vmid             = 201
       node_name        = "pve-t1"
-      datastore_id    = "fiserv0"
       hostname         = "lxc-test-2"
+      datastore_id     = "fiserv0"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
@@ -146,8 +154,8 @@ locals {
     "lxc-test-3" = merge(local.container_defaults, {
       vmid             = 202
       node_name        = "pve-t1"
-      datastore_id    = "fiserv0"
-      hostname         = "lxc-test-2"
+      hostname         = "lxc-test-3"
+      datastore_id     = "fiserv0"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
@@ -156,31 +164,103 @@ locals {
   }
 
   # ── QEMU VMs ─────────────────────────────────────────────────────────────────
-  # To add a VM: copy the example below into vms = { }, adjust the fields, and
+  # To add a VM: copy an example below into vms = { }, adjust the fields, and
   # run: terraform apply
   # To remove a VM: delete its block and run: terraform apply
   #
-  # VMs use cloud-init for first-boot configuration (hostname, IP, SSH keys).
-  # The disk_file_id must point to a cloud image already downloaded to the node.
-  # To download a cloud image via Terraform, see:
-  #   https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_download_file
+  # Choose ONE provisioning method per VM:
+  #
+  #   METHOD 1 — Image (cloud image)
+  #   Provisions a fresh VM from a cloud image already downloaded to the node.
+  #   Use this when you want a clean OS install configured entirely via cloud-init.
+  #   Requires the image file to exist on the target node's datastore.
   #
   # "my-vm-1" = merge(local.vm_defaults, {
-  #   vmid             = 301              # unique ID across the whole cluster
+  #   vmid             = 400              # unique ID across the whole cluster
   #   node_name        = "pve-t0"         # node to create the VM on
   #   name             = "my-vm-1"        # VM display name in Proxmox
-  #   ipv4_address     = "10.0.0.50/24"   # static CIDR required for VMs (no DHCP via cloud-init)
-  #   ipv4_gateway     = "10.0.0.3"       # default gateway
+  #   ipv4_address     = "dhcp"           # "dhcp" or static CIDR e.g. "10.0.0.50/24"
+  #   ipv4_gateway     = null             # null for DHCP; set IP e.g. "10.0.0.3" for static
   #   disk_file_id     = "local:iso/ubuntu-24.04-server-cloudimg-amd64.img"
   #   cpu_cores        = 2                # override default (optional)
   #   memory_dedicated = 2048             # MB; override default (optional)
   #   disk_size        = 20               # GB; override default (optional)
   #   ci_user          = "ubuntu"         # cloud-init user created on first boot
-  #   ssh_public_keys  = [file("~/.ssh/id_rsa.pub")]  # list of SSH public keys for ci_user
+  #   ssh_public_keys  = [file("~/.ssh/id_rsa.pub")]  # SSH public keys for ci_user
   #   tags             = ["iac", "lab", "vm"]
+  # })
+  #
+  #   METHOD 2 — Clone (from an existing QEMU template)
+  #   Clones a VM you have already built and converted to a template in Proxmox.
+  #   Use this when you want a VM with software and configuration already baked in.
+  #   Always creates a full (independent) clone. The cloned disk is placed on
+  #   datastore_id. Cross-node cloning requires shared storage (NFS, Ceph, etc.).
+  #   If the template has cloud-init, ipv4_address/ci_user/ssh_public_keys apply
+  #   on first boot; otherwise those fields are ignored.
+  #
+  # Example A — clone with cloud-init (VMID 501, template has cloud-init installed)
+  # cloud-init will set the IP, user, and SSH keys on first boot.
+  #
+  # "my-vm-clone-1" = merge(local.vm_defaults, {
+  #   vmid               = 410              # unique ID across the whole cluster
+  #   node_name          = "pve-t0"         # node to create the clone ON
+  #   name               = "my-vm-clone-1"  # VM display name in Proxmox
+  #   ipv4_address       = "dhcp"           # "dhcp" or static CIDR e.g. "10.0.0.60/24"
+  #   ipv4_gateway       = null             # null for DHCP; set IP e.g. "10.0.0.3" for static
+  #   clone_vm_id        = 501              # VMID 501 has cloud-init installed
+  #   clone_node_name    = null             # null = same node as template; set "pve-t0" for cross-node
+  #   datastore_id       = "local-lvm"      # datastore for the cloned disk
+  #   cloud_init_enabled = true             # true because VMID 501 has cloud-init
+  #   cpu_cores          = 2                # override template value (optional)
+  #   memory_dedicated   = 2048             # MB; override template value (optional)
+  #   tags               = ["iac", "lab", "clone"]
+  # })
+  #
+  # Example B — clone without cloud-init (VMID 500, no cloud-init installed)
+  # VM boots exactly as the template left it; IP/user must be managed manually.
+  #
+  # "my-vm-clone-2" = merge(local.vm_defaults, {
+  #   vmid               = 411
+  #   node_name          = "pve-t0"
+  #   name               = "my-vm-clone-2"
+  #   ipv4_address       = "dhcp"           # ignored — cloud-init not present
+  #   ipv4_gateway       = null             # ignored — cloud-init not present
+  #   clone_vm_id        = 500              # VMID 500 has NO cloud-init installed
+  #   clone_node_name    = null
+  #   datastore_id       = "local-lvm"
+  #   cloud_init_enabled = false            # false because VMID 500 has no cloud-init
+  #   tags               = ["iac", "lab", "clone"]
   # })
 
   vms = {
+    # Same-node clone — template (501) and new VM both on pve-t0
+    "vm-test-1" = merge(local.vm_defaults, {
+      vmid               = 600
+      node_name          = "pve-t0"
+      name               = "vm-test-1"
+      ipv4_address       = "dhcp"
+      ipv4_gateway       = null
+      clone_vm_id        = 501
+      clone_node_name    = null
+      datastore_id       = "local-lvm"
+      cloud_init_enabled = true
+      tags               = ["iac", "lab", "vm", "clone"]
+    })
+
+    # Cross-node clone — template (501) on pve-t0, deploy to pve-t1
+    # datastore_id must be shared storage so pve-t1 can receive the cloned disk
+    "vm-test-2" = merge(local.vm_defaults, {
+      vmid               = 601
+      node_name          = "pve-t1"
+      name               = "vm-test-2"
+      ipv4_address       = "dhcp"
+      ipv4_gateway       = null
+      clone_vm_id        = 501
+      clone_node_name    = "pve-t0"
+      datastore_id       = "fiserv0"
+      cloud_init_enabled = true
+      tags               = ["iac", "lab", "vm", "clone"]
+    })
   }
 }
 
@@ -222,8 +302,11 @@ module "vms" {
   name             = each.value.name
   ipv4_address     = each.value.ipv4_address
   ipv4_gateway     = each.value.ipv4_gateway
-  disk_file_id     = each.value.disk_file_id
-  bridge           = each.value.bridge
+  disk_file_id       = each.value.disk_file_id
+  clone_vm_id        = each.value.clone_vm_id
+  clone_node_name    = each.value.clone_node_name
+  cloud_init_enabled = each.value.cloud_init_enabled
+  bridge             = each.value.bridge
   datastore_id     = each.value.datastore_id
   disk_size        = each.value.disk_size
   cpu_cores        = each.value.cpu_cores
