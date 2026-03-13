@@ -101,7 +101,7 @@ locals {
   # })
 
   containers = {
-    "my-clone-1" = merge(local.container_defaults, {
+    "lxc-clone-1" = merge(local.container_defaults, {
       vmid            = 310
       node_name       = "pve-t0"
       hostname        = "my-clone-1"
@@ -115,7 +115,7 @@ locals {
       tags            = ["iac", "lab", "clone"]
     })
 
-    "my-clone-2" = merge(local.container_defaults, {
+    "lxc-clone-2" = merge(local.container_defaults, {
       vmid            = 311
       node_name       = "pve-t1"
       hostname        = "my-clone-2"
@@ -150,18 +150,6 @@ locals {
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
       tags             = ["iac", "lab", "lxc"]
     })
-
-    "lxc-test-3" = merge(local.container_defaults, {
-      vmid             = 202
-      node_name        = "pve-t1"
-      hostname         = "lxc-test-3"
-      datastore_id     = "fiserv0"
-      ipv4_address     = "dhcp"
-      ipv4_gateway     = null
-      template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-      tags             = ["iac", "lab", "lxc"]
-    })
-  }
 
   # ── QEMU VMs ─────────────────────────────────────────────────────────────────
   # To add a VM: copy an example below into vms = { }, adjust the fields, and
