@@ -44,6 +44,12 @@ variable "clone_node_name" {
   default     = null
 }
 
+variable "clone_full" {
+  description = "Create a full clone (independent copy) instead of a linked clone. Required for cross-node cloning. Defaults to true."
+  type        = bool
+  default     = true
+}
+
 # ── Networking ─────────────────────────────────────────────────────────────────
 
 variable "bridge" {

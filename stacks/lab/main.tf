@@ -21,9 +21,11 @@ locals {
     # template_file_id: provision from a raw LXC template tarball.
     # clone_vm_id:      clone an existing LXC template (faster, pre-configured).
     # clone_node_name:  source node for clone_vm_id (required for cross-node clones).
+    # clone_full:       create full clone (independent copy); set false for linked clone.
     template_file_id = null
     clone_vm_id      = null
     clone_node_name  = null
+    clone_full       = true
   }
 
   vm_defaults = {
@@ -69,17 +71,25 @@ locals {
   #   METHOD 2 — Clone (from an existing LXC template on the cluster)
   #   Clones a container you have already built and marked as a template in Proxmox.
   #   Use this when you want a container that already has software/config baked in.
+  #
+  #   Clone types:
+  #     - Full clone (clone_full = true):  independent copy of the template; required for
+  #       cross-node cloning with shared storage; larger disk footprint but no parent dependency.
+  #     - Linked clone (clone_full = false): incremental copy; smaller disk footprint but
+  #       depends on parent template still existing; must be on same node.
+  #
   #   clone_node_name is only required when the template lives on a DIFFERENT node
-  #   than the one you are deploying to (cross-node clone).
+  #   than the one you are deploying to (cross-node clone); template must be on shared storage.
   #
   # "my-clone-1" = merge(local.container_defaults, {
   #   vmid             = 220              # unique ID across the whole cluster
-  #   node_name        = "pve-t1"         # node to create the clone ON
+  #   node_name        = "pve-t1"         # node to create the clone ON (can differ from template node)
   #   hostname         = "my-clone-1"
   #   ipv4_address     = "dhcp"           # "dhcp" or static CIDR e.g. "10.0.0.50/24"
   #   ipv4_gateway     = null             # null for DHCP; set IP e.g. "10.0.0.3" for static
   #   clone_vm_id      = 100              # VMID of the source LXC template
-  #   clone_node_name  = "pve-t0"         # node where VMID 100 lives; null if same node
+  #   clone_node_name  = "pve-t0"         # node where VMID 100 lives (required for cross-node)
+  #   clone_full       = true             # true=full clone (independent); false=linked (depends on parent)
   #   cpu_cores        = 2                # override template value (optional)
   #   memory_dedicated = 1024             # MB; override template value (optional)
   #   disk_size        = 8                # GB; must be >= template disk size
@@ -107,7 +117,7 @@ locals {
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 100
-      clone_node_name = null
+      clone_node_name = "pve-t0"
       cpu_cores       = 2
       memory_dedicated = 1024
       tags            = ["iac", "lab", "clone"]
@@ -187,6 +197,7 @@ module "containers" {
   template_file_id = each.value.template_file_id
   clone_vm_id      = each.value.clone_vm_id
   clone_node_name  = each.value.clone_node_name
+  clone_full       = each.value.clone_full
   bridge           = each.value.bridge
   datastore_id     = each.value.datastore_id
   os_type          = each.value.os_type
