@@ -96,6 +96,7 @@ locals {
     "my-clone-1" = merge(local.container_defaults, {
       vmid            = 310
       node_name       = "pve-t0"
+      datastore_id    = "fiserv0"
       hostname        = "my-clone-1"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
@@ -109,6 +110,7 @@ locals {
     "my-clone-2" = merge(local.container_defaults, {
       vmid            = 311
       node_name       = "pve-t1"
+      datastore_id    = "fiserv0"
       hostname        = "my-clone-2"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
@@ -122,6 +124,7 @@ locals {
     "lxc-test-1" = merge(local.container_defaults, {
       vmid             = 200
       node_name        = "pve-t1"
+      datastore_id    = "fiserv0"
       hostname         = "lxc-test-1"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
@@ -132,6 +135,7 @@ locals {
     "lxc-test-2" = merge(local.container_defaults, {
       vmid             = 201
       node_name        = "pve-t1"
+      datastore_id    = "fiserv0"
       hostname         = "lxc-test-2"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
@@ -142,6 +146,7 @@ locals {
     "lxc-test-3" = merge(local.container_defaults, {
       vmid             = 202
       node_name        = "pve-t1"
+      datastore_id    = "fiserv0"
       hostname         = "lxc-test-2"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
