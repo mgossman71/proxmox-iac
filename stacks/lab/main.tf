@@ -102,10 +102,10 @@ locals {
 
   containers = {
     "lxc-clone-1" = merge(local.container_defaults, {
-      vmid            = 310
+      vmid            = 300
       node_name       = "pve-t0"
       hostname        = "lxc-clone-1"
-      datastore_id    = "fiserv0"
+      datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 100
@@ -116,10 +116,10 @@ locals {
     })
 
     "lxc-clone-2" = merge(local.container_defaults, {
-      vmid            = 311
+      vmid            = 301
       node_name       = "pve-t1"
       hostname        = "lxc-clone-2"
-      datastore_id    = "fiserv0"
+      datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 100
@@ -130,10 +130,10 @@ locals {
     })
 
     "lxc-test-1" = merge(local.container_defaults, {
-      vmid             = 200
+      vmid             = 302
       node_name        = "pve-t1"
       hostname         = "lxc-test-1"
-      datastore_id     = "fiserv0"
+      datastore_id     = "truenas-nvme"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
@@ -141,10 +141,10 @@ locals {
     })
 
     "lxc-test-2" = merge(local.container_defaults, {
-      vmid             = 201
+      vmid             = 303
       node_name        = "pve-t1"
       hostname         = "lxc-test-2"
-      datastore_id     = "fiserv0"
+      datastore_id     = "truenas-nvme"
       ipv4_address     = "dhcp"
       ipv4_gateway     = null
       template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
@@ -229,9 +229,9 @@ locals {
      name               = "vm-test-1"
      ipv4_address       = "dhcp"
      ipv4_gateway       = null
-     clone_vm_id        = 502
+     clone_vm_id        = 500
      clone_node_name    = null
-     datastore_id       = "local-lvm"
+     datastore_id       = "truenas-nvme"
      cloud_init_enabled = true
      tags               = ["iac", "lab", "vm", "clone"]
    })
@@ -244,9 +244,9 @@ locals {
 #     name               = "vm-test-2"
 #     ipv4_address       = "dhcp"
 #     ipv4_gateway       = null
-#     clone_vm_id        = 502
+#     clone_vm_id        = 500
 #     clone_node_name    = "pve-t0"
-#     datastore_id       = "fiserv0"
+#     datastore_id       = "truenas-nvme"
 #     cloud_init_enabled = true
 #     tags               = ["iac", "lab", "vm", "clone"]
 #   })
