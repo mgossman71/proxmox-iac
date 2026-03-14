@@ -253,7 +253,7 @@ locals {
 
    "vm-plex" = merge(local.vm_defaults, {
      vmid               = 602
-     node_name          = "pve-t1"
+     node_name          = "pve-t0"
      name               = "vm-plex"
      ipv4_address       = "dhcp"
      ipv4_gateway       = null
