@@ -33,8 +33,8 @@ variable "template_file_id" {
 
   validation {
     condition = (
-      (self.value != null && var.clone_vm_id == null) ||
-      (self.value == null && var.clone_vm_id != null)
+      (var.template_file_id != null && var.clone_vm_id == null) ||
+      (var.template_file_id == null && var.clone_vm_id != null)
     )
     error_message = "Exactly one of template_file_id or clone_vm_id must be specified."
   }
