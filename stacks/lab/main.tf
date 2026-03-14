@@ -250,6 +250,20 @@ locals {
      cloud_init_enabled = true
      tags               = ["iac", "lab", "vm", "clone"]
    })
+
+   "vm-plex" = merge(local.vm_defaults, {
+     vmid               = 602
+     node_name          = "pve-t0"
+     name               = "vm-plex"
+     ipv4_address       = "dhcp"
+     ipv4_gateway       = null
+     clone_vm_id        = 500
+     clone_node_name    = "pve-t0"
+     datastore_id       = "truenas-nvme"
+     cloud_init_enabled = true
+     tags               = ["iac", "lab", "vm", "clone"]
+   })
+      
   }
 }
 
