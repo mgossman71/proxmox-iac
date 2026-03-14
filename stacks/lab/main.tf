@@ -108,7 +108,7 @@ locals {
       datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
-      clone_vm_id     = 100
+      clone_vm_id     = 700
       clone_node_name = null
       cpu_cores       = 2
       memory_dedicated = 1024
@@ -122,7 +122,7 @@ locals {
       datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
-      clone_vm_id     = 100
+      clone_vm_id     = 700
       clone_node_name = "pve-t0"
       cpu_cores       = 2
       memory_dedicated = 1024
@@ -263,7 +263,7 @@ locals {
      cloud_init_enabled = true
      tags               = ["iac", "lab", "vm", "clone"]
    })
-      
+
   }
 }
 
