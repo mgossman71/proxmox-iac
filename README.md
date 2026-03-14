@@ -23,9 +23,12 @@ A **module** is a reusable building block. You never run `terraform` inside a mo
 
 ## Prerequisites
 
+Before running any Terraform commands, your Proxmox cluster **must** be configured to accept API requests:
+
 - [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.3
-- Network access to your Proxmox API endpoint
-- A Proxmox API token (see below)
+- Network access to your Proxmox API endpoint (typically `https://<node-ip>:8006/`)
+- A Proxmox API token with appropriate permissions (created in the Proxmox UI — see Step 1 below)
+- An SSH key pair for cloud-init SSH access when provisioning VMs (optional, but recommended)
 
 ---
 
@@ -106,7 +109,9 @@ Find the VMID of your LXC template:
 pct list
 ```
 
-Note the VMID of your template (e.g. `100`). That is the value used for `clone_vm_id` in Terraform. If the template lives on shared storage (NFS, Ceph, etc.), it can be cloned to any node in the cluster.
+Note the VMID of your template (e.g. `100`). That is the value used for `clone_vm_id` in Terraform.
+
+**For cross-node cloning:** The template **must** live on shared storage (NFS, Ceph, etc.) accessible from both the source node (where the template exists) and destination node (where you're deploying). The cloned container itself does not need to be on shared storage — it can be placed on local datastores.
 
 ### QEMU cloud images (image method)
 
@@ -142,15 +147,24 @@ qm list
 
 Note the VMID of your template (e.g. `500`). That is the value used for `clone_vm_id` in Terraform.
 
-To verify whether a template has cloud-init (which allows Terraform to configure IP, hostname, and SSH keys on first boot):
+#### Cloud-init support
+
+Check whether your template has cloud-init installed:
 
 ```bash
 qm config <vmid>
 ```
 
-Look for a line containing `cloudinit` (e.g. `ide2: local-lvm:vm-501-cloudinit`). If present, set `cloud_init_enabled = true` in the VM entry and Terraform will apply IP/user/SSH config on first boot. If absent, set `cloud_init_enabled = false` — the VM will boot exactly as the template left it and cloud-init fields are ignored.
+Look for a line containing `cloudinit` (e.g. `ide2: local-lvm:vm-501-cloudinit`):
 
-Cross-node cloning requires the template's storage to be accessible from both nodes (e.g. shared NFS or Ceph).
+- **If present:** Set `cloud_init_enabled = true`. Terraform will apply IP address, hostname, SSH keys, and other config on first boot.
+- **If absent:** Set `cloud_init_enabled = false`. The VM boots exactly as the template left it; Terraform ignores IP/user/SSH config fields. You must manage network/user setup manually.
+
+**Important:** If you set `cloud_init_enabled = true` on a template without cloud-init, those fields will be silently ignored. Always verify the template has cloud-init before setting this to true.
+
+#### Cross-node cloning
+
+For cross-node cloning, the template **must** live on shared storage (NFS, Ceph, etc.) accessible from both the source node and destination node. The cloned VM's disk itself does not need to be on shared storage — it can be placed on local datastores.
 
 ### List available storage and existing VMs via API
 
@@ -167,7 +181,9 @@ pct list
 
 ## Step 3 — Set environment variables
 
-Credentials are never stored in files. Export these in your shell before running any Terraform commands:
+Terraform reads credentials from environment variables — credentials are **never** stored in your codebase or committed to git.
+
+### Option A — Manual export (one-time per shell session)
 
 ```bash
 export PROXMOX_VE_ENDPOINT='https://10.0.0.132:8006/'
@@ -175,12 +191,29 @@ export PROXMOX_VE_API_TOKEN='terraform@pam!iac=your-token-secret-here'
 export PROXMOX_VE_INSECURE='true'   # omit if you have a valid TLS certificate
 ```
 
-> **Note:** Use single quotes around the token value. Double quotes cause bash to
-> interpret the `!` character as a history expansion event.
+Then run terraform from that same shell.
 
-To avoid re-exporting on every session, add them to a `.envrc` file in the repo
-root and use [direnv](https://direnv.net/), or add them to your shell profile.
-**Never commit credential values to git.**
+> **Important:** Use single quotes around the token value. Double quotes cause bash to interpret the `!` character as a history expansion event.
+
+### Option B — Persistent with direnv (recommended)
+
+[direnv](https://direnv.net/) automatically loads environment variables from a `.envrc` file when you `cd` into the repo, and unloads them when you leave.
+
+1. Install direnv: `brew install direnv` (or your package manager)
+2. Create `.envrc` in the repo root:
+   ```bash
+   export PROXMOX_VE_ENDPOINT='https://10.0.0.132:8006/'
+   export PROXMOX_VE_API_TOKEN='terraform@pam!iac=your-token-secret-here'
+   export PROXMOX_VE_INSECURE='true'
+   ```
+3. Allow direnv: `direnv allow`
+4. Verify: `direnv env` should show your exported variables
+
+The `.envrc` file is already in `.gitignore` and will never be committed.
+
+### Option C — Shell profile (persistent but less isolated)
+
+Add the exports to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.). Less recommended because the credentials persist system-wide.
 
 ---
 
@@ -334,6 +367,25 @@ vms = {
 
 Delete its entry from the map and run `terraform apply`. Terraform will destroy
 only that machine and leave all others untouched.
+
+---
+
+## Credential safety
+
+Credentials are never stored in version control:
+
+- **.envrc** — Contains API token and endpoint. Automatically ignored by git (in `.gitignore`).
+- **terraform.tfstate** — Contains sensitive resource information. Automatically ignored by git.
+- **Environment variables** — Credentials are read from your shell; never committed.
+
+To verify nothing sensitive is staged for commit before pushing:
+
+```bash
+git diff --cached        # Check staged changes
+git log -p --reverse     # Review all commits
+```
+
+**Never manually edit `.gitignore` to commit credentials.** If credentials are accidentally exposed, revoke the API token immediately in the Proxmox UI.
 
 ---
 

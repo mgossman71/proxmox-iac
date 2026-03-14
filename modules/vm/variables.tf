@@ -30,6 +30,14 @@ variable "disk_file_id" {
   description = "Cloud image file ID already present on the datastore (e.g. local:iso/ubuntu-24.04-server-cloudimg-amd64.img). Mutually exclusive with clone_vm_id."
   type        = string
   default     = null
+
+  validation {
+    condition = (
+      (self.value != null && var.clone_vm_id == null) ||
+      (self.value == null && var.clone_vm_id != null)
+    )
+    error_message = "Exactly one of disk_file_id or clone_vm_id must be specified."
+  }
 }
 
 variable "clone_vm_id" {

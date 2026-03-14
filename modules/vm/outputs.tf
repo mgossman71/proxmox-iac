@@ -9,8 +9,8 @@ output "name" {
 }
 
 output "ipv4_address" {
-  description = "VM IPv4 address (with CIDR)"
-  value       = proxmox_virtual_environment_vm.this.initialization[0].ip_config[0].ipv4[0].address
+  description = "VM IPv4 address (with CIDR). Returns 'N/A' if cloud-init is disabled."
+  value       = var.cloud_init_enabled ? proxmox_virtual_environment_vm.this.initialization[0].ip_config[0].ipv4[0].address : "N/A"
 }
 
 output "node_name" {

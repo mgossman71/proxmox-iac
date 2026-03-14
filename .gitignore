@@ -1,5 +1,16 @@
+# Terraform state and locks
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.*
+
+# Variable files (may contain sensitive data)
+*.tfvars
+*.tfvars.json
 *.auto.tfvars
+
+# Direnv (credentials)
+.envrc
+
+# OS files
+.DS_Store

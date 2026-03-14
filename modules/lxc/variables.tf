@@ -30,6 +30,14 @@ variable "template_file_id" {
   description = "LXC template file ID (e.g. local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst). Mutually exclusive with clone_vm_id."
   type        = string
   default     = null
+
+  validation {
+    condition = (
+      (self.value != null && var.clone_vm_id == null) ||
+      (self.value == null && var.clone_vm_id != null)
+    )
+    error_message = "Exactly one of template_file_id or clone_vm_id must be specified."
+  }
 }
 
 variable "clone_vm_id" {
