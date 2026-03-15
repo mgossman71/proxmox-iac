@@ -7,7 +7,7 @@ locals {
   container_defaults = {
     ipv4_gateway     = null
     bridge           = "vmbr1"
-    datastore_id     = "vmdata"
+    datastore_id     = "truenas-nvme"
     os_type          = "ubuntu"
     disk_size        = 8
     cpu_cores        = 2
@@ -29,7 +29,7 @@ locals {
   vm_defaults = {
     ipv4_gateway     = null
     bridge           = "vmbr1"
-    datastore_id     = "vmdata"
+    datastore_id     = "truenas-nvme"
     cpu_cores        = 2
     cpu_type         = "x86-64-v2-AES"
     memory_dedicated = 2048
@@ -105,7 +105,7 @@ locals {
       vmid            = 900
       node_name       = "pve4"
       hostname        = "lxc-clone-1"
-      datastore_id    = "vmdata"
+      datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 700
@@ -119,7 +119,7 @@ locals {
       vmid            = 901
       node_name       = "pve4"
       hostname        = "lxc-clone-2"
-      datastore_id    = "vmdata"
+      datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 700
@@ -176,7 +176,7 @@ locals {
   #   ipv4_gateway       = null             # null for DHCP; set IP e.g. "10.0.0.3" for static
   #   clone_vm_id        = 501              # VMID 501 has cloud-init installed
   #   clone_node_name    = null             # null = same node as template; set "pve-t0" for cross-node
-  #   datastore_id       = "local-lvm"      # datastore for the cloned disk
+  #   datastore_id       = "truenas-nvme"      # datastore for the cloned disk
   #   cloud_init_enabled = true             # true because VMID 501 has cloud-init
   #   cpu_cores          = 2                # override template value (optional)
   #   memory_dedicated   = 2048             # MB; override template value (optional)
@@ -194,7 +194,7 @@ locals {
   #   ipv4_gateway       = null             # ignored — cloud-init not present
   #   clone_vm_id        = 500              # VMID 500 has NO cloud-init installed
   #   clone_node_name    = null
-  #   datastore_id       = "local-lvm"
+  #   datastore_id       = "truenas-nvme"
   #   cloud_init_enabled = false            # false because VMID 500 has no cloud-init
   #   tags               = ["iac", "lab", "clone"]
   # })
@@ -209,7 +209,7 @@ locals {
      ipv4_gateway       = null
      clone_vm_id        = 600
      clone_node_name    = "pve3"
-     datastore_id       = "vmdata"
+     datastore_id       = "truenas-nvme"
      cloud_init_enabled = true
      tags               = ["iac", "lab"]
    })
