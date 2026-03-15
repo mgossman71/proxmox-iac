@@ -103,7 +103,7 @@ locals {
   containers = {
     "lxc-clone-1" = merge(local.container_defaults, {
       vmid            = 900
-      node_name       = "pve4"
+      node_name       = "pve3"
       hostname        = "lxc-clone-1"
       datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
@@ -117,7 +117,7 @@ locals {
 
     "lxc-clone-2" = merge(local.container_defaults, {
       vmid            = 901
-      node_name       = "pve4"
+      node_name       = "pve3"
       hostname        = "lxc-clone-2"
       datastore_id    = "truenas-nvme"
       ipv4_address    = "dhcp"
@@ -203,7 +203,7 @@ locals {
     # Same-node clone — template (501) and new VM both on pve-t0
    "vm-test-1" = merge(local.vm_defaults, {
      vmid               = 800
-     node_name          = "pve4"
+     node_name          = "pve3"
      name               = "vm-test-1"
      ipv4_address       = "dhcp"
      ipv4_gateway       = null
