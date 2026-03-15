@@ -203,7 +203,7 @@ locals {
     # Same-node clone — template (501) and new VM both on pve-t0
    "vm-test-1" = merge(local.vm_defaults, {
      vmid               = 800
-     node_name          = "pve3"
+     node_name          = "pve4"
      name               = "vm-test-1"
      ipv4_address       = "dhcp"
      ipv4_gateway       = null
