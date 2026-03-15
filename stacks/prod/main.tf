@@ -109,7 +109,7 @@ locals {
       ipv4_address    = "dhcp"
       ipv4_gateway    = null
       clone_vm_id     = 700
-      clone_node_name = pve3
+      clone_node_name = "pve3"
       cpu_cores       = 2
       memory_dedicated = 1024
       tags            = ["iac", "lab"]
@@ -128,7 +128,7 @@ locals {
       memory_dedicated = 1024
       tags            = ["iac", "lab"]
     })
-
+  }
 
   # ── QEMU VMs ─────────────────────────────────────────────────────────────────
   # To add a VM: copy an example below into vms = { }, adjust the fields, and
@@ -208,7 +208,7 @@ locals {
      ipv4_address       = "dhcp"
      ipv4_gateway       = null
      clone_vm_id        = 600
-     clone_node_name    = pve3
+     clone_node_name    = "pve3"
      datastore_id       = "vmdata"
      cloud_init_enabled = true
      tags               = ["iac", "lab"]
