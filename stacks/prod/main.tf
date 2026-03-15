@@ -103,7 +103,7 @@ locals {
   containers = {
     "lxc-clone-1" = merge(local.container_defaults, {
       vmid            = 900
-      node_name       = "pve3"
+      node_name       = "pve4"
       hostname        = "lxc-clone-1"
       datastore_id    = "vmdata"
       ipv4_address    = "dhcp"
@@ -117,7 +117,7 @@ locals {
 
     "lxc-clone-2" = merge(local.container_defaults, {
       vmid            = 901
-      node_name       = "pve3"
+      node_name       = "pve4"
       hostname        = "lxc-clone-2"
       datastore_id    = "vmdata"
       ipv4_address    = "dhcp"
