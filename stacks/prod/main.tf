@@ -112,7 +112,7 @@ locals {
       clone_node_name = "pve3"
       cpu_cores       = 2
       memory_dedicated = 1024
-      tags            = ["truenas-nvme,iac", "lab"]
+      tags            = ["nvme,iac", "lab"]
     })
 
     "lxc-clone-2" = merge(local.container_defaults, {
@@ -126,7 +126,7 @@ locals {
       clone_node_name = "pve3"
       cpu_cores       = 2
       memory_dedicated = 1024
-      tags            = ["truenas-nvme,iac", "lab"]
+      tags            = ["nvme,iac", "lab"]
     })
   }
 
@@ -211,7 +211,7 @@ locals {
      clone_node_name    = "pve3"
      datastore_id       = "truenas-nvme"
      cloud_init_enabled = true
-     tags               = ["truenas-nvme,iac", "lab"]
+     tags               = ["nvme,iac", "lab"]
    })
   }
 }
