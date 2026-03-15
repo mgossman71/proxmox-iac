@@ -51,6 +51,8 @@ resource "proxmox_virtual_environment_vm" "this" {
   dynamic "initialization" {
     for_each = var.cloud_init_enabled ? [1] : []
     content {
+      datastore_id = var.datastore_id
+
       ip_config {
         ipv4 {
           address = var.ipv4_address

@@ -12,7 +12,8 @@ proxmox-iac/
 │   ├── lxc/        # Reusable module for LXC containers
 │   └── vm/         # Reusable module for QEMU VMs
 └── stacks/
-    └── lab/        # Example stack — has its own independent state
+    ├── lab/        # Lab stack — has its own independent state
+    └── prod/       # Production stack — has its own independent state
 ```
 
 A **stack** is a directory under `stacks/` with its own Terraform state. Stacks are fully independent — deploying or destroying one has no effect on any other.
@@ -40,32 +41,35 @@ Terraform authenticates to Proxmox using an API token, not a password.
 
 1. Log in to your Proxmox web UI (e.g. `https://10.0.0.132:8006`)
 2. Navigate to **Datacenter → Permissions → Users**
-3. Create a dedicated user (e.g. `terraform@pam`) or use an existing one
-4. Navigate to **Datacenter → Permissions → API Tokens**
-5. Click **Add**, select your user, give the token a name (e.g. `iac`)
-6. Uncheck **Privilege Separation** so the token inherits the user's permissions
-7. Click **Add** — copy the token secret immediately, it is only shown once
+3. Click **Add** and create a dedicated user (e.g. `terraform`, Realm: `pam`) — or use an existing one
+4. Navigate to **Datacenter → Permissions → Add → User Permission** and add an entry:
+
+   | Path | User | Role |
+   |------|------|------|
+   | `/` | `terraform@pam` | `Administrator` |
+
+   > **Why the user, not the token?** When Privilege Separation is disabled (next step), the token's effective permissions are the user's permissions. The grant must be on the user.
+   >
+   > **Note:** `Administrator` grants full access and is the simplest option for a dedicated automation user. If you prefer least-privilege, use `PVEAdmin` or scope separate roles to `/vms`, `/nodes`, and `/storage`.
+
+5. Navigate to **Datacenter → Permissions → API Tokens**
+6. Click **Add**, select your user, give the token a name (e.g. `iac`)
+7. Uncheck **Privilege Separation** so the token inherits the user's permissions
+8. Click **Add** — **copy the token secret immediately**, it is only shown once
 
 The token ID will be in the format `user@realm!token-name` (e.g. `terraform@pam!iac`).
 
-### Grant permissions
-
-Navigate to **Datacenter → Permissions** and add a permission entry:
-
-| Path | User/Token | Role |
-|------|-----------|------|
-| `/` | `terraform@pam!iac` | `PVEAdmin` or `Administrator` |
-
-For a least-privilege setup, scope the path to `/vms` and `/nodes` with `PVEVMAdmin`.
-
 ### Via the Proxmox CLI (alternative)
 
+SSH into any Proxmox node and run:
+
 ```bash
-# On a Proxmox node
 pveum user add terraform@pam
-pveum aclmod / -user terraform@pam -role PVEAdmin
+pveum aclmod / --user terraform@pam --role Administrator
 pveum user token add terraform@pam iac --privsep=0
 ```
+
+The last command prints the token secret to the terminal — **copy it immediately**, it cannot be retrieved again.
 
 ---
 
@@ -415,10 +419,10 @@ overridden that field.
 A stack is just a directory with three files. Copy an existing one:
 
 ```bash
-cp -r stacks/lab stacks/production
+cp -r stacks/lab stacks/prod
 ```
 
-Then edit `stacks/production/main.tf`:
+Then edit `stacks/prod/main.tf`:
 
 1. Update `container_defaults` / `vm_defaults` for the new environment
    (different gateway, datastore, network bridge, etc.)
@@ -428,12 +432,12 @@ Then edit `stacks/production/main.tf`:
 Initialize and deploy:
 
 ```bash
-cd stacks/production
+cd stacks/prod
 terraform init
 terraform apply
 ```
 
-Each stack has its own `.terraform/` directory and state file — `production` and
+Each stack has its own `.terraform/` directory and state file — `prod` and
 `lab` are completely independent.
 
 ---
